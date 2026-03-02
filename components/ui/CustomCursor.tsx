@@ -5,21 +5,19 @@ import { useEffect, useRef, useState } from "react";
 export default function CustomCursor() {
     const dotRef = useRef<HTMLDivElement>(null);
     const ringRef = useRef<HTMLDivElement>(null);
-    // Start as false — only flip to true on desktop with a real mouse
     const [show, setShow] = useState(false);
 
     useEffect(() => {
-        // `(pointer: fine)` is true only on mouse-driven devices (PC)
-        // `(pointer: coarse)` catches all touch/mobile devices
+        // Only activate on true mouse/pointer devices (desktop)
+        // `(pointer: fine)` = mouse; `(pointer: coarse)` = touch/mobile
         const isMouse = window.matchMedia("(pointer: fine)").matches;
-        if (!isMouse) return; // bail out completely on mobile/touch
+        if (!isMouse) return;
 
         let mouseX = 0;
         let mouseY = 0;
         let ringX = 0;
         let ringY = 0;
         let raf: number;
-        let hasMoved = false;
 
         const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
@@ -27,16 +25,13 @@ export default function CustomCursor() {
             mouseX = e.clientX;
             mouseY = e.clientY;
 
-            // Snap dot immediately
             if (dotRef.current) {
                 dotRef.current.style.transform = `translate(${mouseX - 4}px, ${mouseY - 4}px)`;
             }
 
-            // Reveal cursor elements only after the first real mouse move
-            if (!hasMoved) {
-                hasMoved = true;
-                setShow(true);
-            }
+            // Only reveal elements after the first actual mouse move
+            // This prevents the ring from appearing at (0,0) on load
+            setShow(true);
         };
 
         const animate = () => {
@@ -49,7 +44,6 @@ export default function CustomCursor() {
             raf = requestAnimationFrame(animate);
         };
 
-        // Scale ring on interactive elements
         const onEnter = () => {
             if (dotRef.current) dotRef.current.style.opacity = "0";
             if (ringRef.current) {
@@ -85,20 +79,22 @@ export default function CustomCursor() {
         };
     }, []);
 
-    // Render nothing on mobile OR before the mouse has moved at all
+    // Render nothing on mobile/touch OR before mouse has moved
     if (!show) return null;
 
     return (
         <>
-            {/* Dot — snaps directly to cursor */}
+            {/* Dot */}
             <div
+                id="custom-cursor-dot"
                 ref={dotRef}
                 className="fixed top-0 left-0 w-2 h-2 rounded-full pointer-events-none z-[99999] transition-opacity duration-200"
                 style={{ backgroundColor: "var(--accent-teal)" }}
                 aria-hidden
             />
-            {/* Ring — lerps behind cursor */}
+            {/* Ring */}
             <div
+                id="custom-cursor-ring"
                 ref={ringRef}
                 className="fixed top-0 left-0 w-10 h-10 rounded-full pointer-events-none z-[99998] border border-white/60 transition-[width,height,border-color,background-color] duration-200"
                 aria-hidden

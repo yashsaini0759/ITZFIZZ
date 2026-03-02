@@ -185,3 +185,18 @@ section {
     /* reduce GPU load on mobile */
   }
 }
+
+/* ─── CSS failsafe: hide custom cursor on ALL touch devices ─── */
+/* This works even before JS hydrates, covering any edge case   */
+@media (pointer: coarse) {
+
+  #custom-cursor-dot,
+  #custom-cursor-ring {
+    display: none !important;
+  }
+
+  body,
+  * {
+    cursor: auto !important;
+  }
+}
