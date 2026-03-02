@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function CustomCursor() {
     const dotRef = useRef<HTMLDivElement>(null);
     const ringRef = useRef<HTMLDivElement>(null);
+    const [isPointer, setIsPointer] = useState(false);
 
     useEffect(() => {
-        // Disable on touch devices
-        if (window.matchMedia("(pointer: coarse)").matches) return;
+        // Only show on true pointer (mouse) devices — hide on touch/mobile
+        if (!window.matchMedia("(pointer: fine)").matches) return;
+        setIsPointer(true);
 
         let mouseX = 0;
         let mouseY = 0;
@@ -74,7 +76,7 @@ export default function CustomCursor() {
         };
     }, []);
 
-    return (
+    return isPointer ? (
         <>
             {/* Dot */}
             <div
@@ -90,5 +92,5 @@ export default function CustomCursor() {
                 aria-hidden
             />
         </>
-    );
+    ) : null;
 }
